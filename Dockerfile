@@ -4,17 +4,15 @@ FROM node:boron
 RUN mkdir -p /usr/src/hackeventlistener
 WORKDIR /usr/src/hackeventlistener
 
-ENV INSIGHTSKEY=
-ENV SOURCE=
+ENV RABBITMQHOST=
 ENV PROCESSENDPOINT=
+ENV TEAMNAME=
 ENV PARTITIONKEY=
-ENV RABBITMQURL=
-
+# Bundle app source
+ADD / . 
 
 # Install app dependencies
 RUN npm install
 
-# Bundle app source
-ADD / . 
 
-CMD [ "node", "eventlistener.js" ]
+CMD [ "node", "hackeventlistener.js" ]
