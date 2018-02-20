@@ -33,7 +33,8 @@ amqp.connect(connectionString , function (err, conn) {
     conn.createChannel(function (err, ch) {
         var q = 'order';
 
-        ch.assertQueue(q, { durable: false });
+        ch.assertQueue(q, { durable: true });
+        ch.prefetch(1);
         console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", q);
         ch.consume(q, function (msg) {
             console.log(" [x] Received %s", msg.content.toString());
@@ -65,20 +66,21 @@ amqp.connect(connectionString , function (err, conn) {
                 catch (e) {
                     session.send('error!: ' + e.message);
                 }
+                ch.ack(msg);
             } // we have a process endpoint
 
             try {
 
                 if (insightsKey != "") {
                     let appclient = appInsights.defaultClient;
-                    appclient.trackEvent("RabbitMQListener:v4 " + teamname );
+                    appclient.trackEvent("RabbitMQListener: " + teamname );
                 }
             }
-
+            
             catch (e) {
                 console.error("AppInsights " + e.message);
             }
 
-        }, { noAck: true });
+        }, { noAck: false });
     });
 });

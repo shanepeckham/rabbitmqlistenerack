@@ -1,2 +1,2 @@
-docker build -t shanepeckham/rabbitmqlistenerack:v5 . 
-docker push shanepeckham/rabbitmqlistenerack:v5
+docker build -t shanepeckham/rabbitmqlistenerack:v6 . 
+docker push shanepeckham/rabbitmqlistenerack:v6
