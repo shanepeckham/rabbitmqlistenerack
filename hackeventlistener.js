@@ -6,6 +6,25 @@ var request = require('request');
 
 var amqp = require('amqplib/callback_api');
 
+// Let's validate and spool the ENV VARS
+if (process.env.RABBITMQHOST.length == 0) {
+    console.log("The environment variable RABBITMQHOST has not been set" );
+} else {
+    console.log("The environment variable RABBITMQHOST is " + process.env.RABBITMQHOST);
+}
+
+if (process.env.PROCESSENDPOINT.length == 0) {
+    console.log("The environment variable PROCESSENDPOINT has not been set" );
+} else {
+    console.log("The environment variable PROCESSENDPOINT is " +  process.env.PROCESSENDPOINT);
+}
+
+if (process.env.TEAMNAME.length == 0) {
+    console.log("The environment variable TEAMNAME has not been set" );
+} else {
+    console.log("The environment variable TEAMNAME is " +  process.env.TEAMNAME);
+}
+
 
 // Start
 var source = process.env.SOURCE;
@@ -15,11 +34,9 @@ var processendpoint = process.env.PROCESSENDPOINT;
 var insightsKey = '23c6b1ec-ca92-4083-86b6-eba851af9032';
 var teamname = process.env.TEAMNAME;
 
-
 if (insightsKey != "") {
     appInsights.setup(insightsKey).start();
   }
-
 
 if (partitionKey == "")
 {
