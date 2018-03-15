@@ -1,4 +1,4 @@
-# RabbitMQ Listener - The Azure Kubernetes Challenge
+# RabbitMQ Listener - TACK
 A containerised nodejs event listener that listens to RabbitMQ and passes requests on to an internal endpoint
 
 The following environment variables need to be passed to the container:
