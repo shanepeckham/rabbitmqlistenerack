@@ -56,10 +56,10 @@ amqp.connect(connectionString , function (err, conn) {
         ch.consume(q, function (msg) {
             console.log(" [x] Received %s", msg.content.toString());
 
-            var jj = msg.content.toString()
+            var jj = msg.content.toString();
 
             var orderId = jj.substring(10, 34);
-            console.log("order " + orderId)
+            console.log("order " + orderId);
 
             // Set the headers
             var headers = {
@@ -81,7 +81,7 @@ amqp.connect(connectionString , function (err, conn) {
                     });
                 }
                 catch (e) {
-                    session.send('error!: ' + e.message);
+                    console.log('error!: ' + e.message);
                 }
                 ch.ack(msg);
             } // we have a process endpoint
