@@ -33,3 +33,5 @@ msbuild.wrn
 
 # MacOS
 .DS_Store
+
+node_modules
