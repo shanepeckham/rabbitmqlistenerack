@@ -4,10 +4,10 @@ FROM node:boron
 RUN mkdir -p /usr/src/hackeventlistener
 WORKDIR /usr/src/hackeventlistener
 
-ENV RABBITMQHOST=
+ENV AMQPURL=
 ENV PROCESSENDPOINT=
 ENV TEAMNAME=
-ENV PARTITIONKEY=
+
 # Bundle app source
 ADD / . 
 

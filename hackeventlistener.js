@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 'use strict';
 
 let appInsights = require('applicationinsights');
@@ -7,58 +8,99 @@ var request = require('request');
 var amqp = require('amqplib/callback_api');
 
 // Let's validate and spool the ENV VARS
-if (process.env.RABBITMQHOST.length == 0) {
-    console.log("The environment variable RABBITMQHOST has not been set" );
+if (process.env.AMQPURL.length == 0) {
+    console.log("The environment variable AMQPURL has not been set");
 } else {
-    console.log("The environment variable RABBITMQHOST is " + process.env.RABBITMQHOST);
+    console.log("The environment variable AMQPURL is " + process.env.AMQPURL);
 }
 
 if (process.env.PROCESSENDPOINT.length == 0) {
-    console.log("The environment variable PROCESSENDPOINT has not been set" );
+    console.log("The environment variable PROCESSENDPOINT has not been set");
 } else {
-    console.log("The environment variable PROCESSENDPOINT is " +  process.env.PROCESSENDPOINT);
+    console.log("The environment variable PROCESSENDPOINT is " + process.env.PROCESSENDPOINT);
 }
 
 if (process.env.TEAMNAME.length == 0) {
-    console.log("The environment variable TEAMNAME has not been set" );
+    console.log("The environment variable TEAMNAME has not been set");
 } else {
-    console.log("The environment variable TEAMNAME is " +  process.env.TEAMNAME);
+    console.log("The environment variable TEAMNAME is " + process.env.TEAMNAME);
 }
 
 
 // Start
-var source = process.env.SOURCE;
-var partitionKey = process.env.PARTITIONKEY.trim();
-var connectionString = process.env.RABBITMQHOST;
+var connectionString = process.env.AMQPURL;
 var processendpoint = process.env.PROCESSENDPOINT;
 var insightsKey = '23c6b1ec-ca92-4083-86b6-eba851af9032';
 var teamname = process.env.TEAMNAME;
+var amqpConn = null;
+
 
 if (insightsKey != "") {
     appInsights.setup(insightsKey).start();
-  }
-
-if (partitionKey == "")
-{
-    partitionKey = 0;
 }
 
-console.log("Connecting to Rabbit instance " + connectionString);
+console.log("Connecting to Rabbit instance: " + connectionString);
+start();
 
-amqp.connect(connectionString , function (err, conn) {
+function closeOnErr(err) {
+    if (!err) return false;
+    console.error("[AMQP] error", err);
+    amqpConn.close();
+    return true;
+}
 
-    conn.createChannel(function (err, ch) {
+function start() {
+    amqp.connect(connectionString, function (err, conn) {
+
+        if (err) {
+            // We had a problem connection to the instance, retry again
+            console.error("Error connecting to Rabbit instance. Will retry: " + err);
+            return setTimeout(start, 1000);
+        }
+
+        conn.on("error", function (err) {
+            if (err.message !== "Connection closing") {
+                console.error("[AMQP] conn error", err.message);
+            }
+        });
+
+        conn.on("close", function () {
+            console.error("[AMQP] reconnecting");
+            return setTimeout(start, 1000);
+        });
+
+        console.log("[AMQP] connected");
+        amqpConn = conn;
+
+        whenConnected();
+    });
+}
+
+function whenConnected() {
+    startWorker();
+}
+
+function startWorker() {
+    amqpConn.createChannel(function (err, ch) {
+        if (closeOnErr(err)) return;
+        ch.on("error", function (err) {
+            console.error("[AMQP] channel error", err.message);
+        });
+        ch.on("close", function () {
+            console.log("[AMQP] channel closed");
+        });
+
         var q = 'order';
 
-        ch.assertQueue(q, { durable: true });
+        ch.assertQueue(q, {
+            durable: true
+        });
         ch.prefetch(1);
         console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", q);
         ch.consume(q, function (msg) {
             console.log(" [x] Received %s", msg.content.toString());
-
-            var jj = msg.content.toString();
-
-            var orderId = jj.substring(10, 34);
+            var orderJson = JSON.parse(msg.content);
+            var orderId = orderJson.order;
             console.log("order " + orderId);
 
             // Set the headers
@@ -72,15 +114,15 @@ amqp.connect(connectionString , function (err, conn) {
                     url: processendpoint,
                     method: 'POST',
                     headers: headers,
-                    json: { 'ID': orderId }
+                    json: {
+                        'OrderId': orderId
+                    }
                 };
 
                 // Start the request
                 try {
-                    request(options, function () {
-                    });
-                }
-                catch (e) {
+                    request(options, function () {});
+                } catch (e) {
                     console.log('error!: ' + e.message);
                 }
                 ch.ack(msg);
@@ -90,14 +132,14 @@ amqp.connect(connectionString , function (err, conn) {
 
                 if (insightsKey != "") {
                     let appclient = appInsights.defaultClient;
-                    appclient.trackEvent("RabbitMQListener: " + teamname );
+                    appclient.trackEvent("RabbitMQListener: " + teamname);
                 }
-            }
-            
-            catch (e) {
+            } catch (e) {
                 console.error("AppInsights " + e.message);
             }
 
-        }, { noAck: false });
+        }, {
+            noAck: false
+        });
     });
-});
+}

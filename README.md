@@ -9,8 +9,7 @@ ENV TEAMNAME=[YourTeamName]
 ```
 ### For RabbitMQ
 ```
-ENV RABBITMQHOST=amqp://[url]l:5672
-ENV PARTITIONKEY=[0,1,2]
+ENV AMQPURL=amqp://[url]l:5672
 ```
 ### For Process Endpoint
 ```
