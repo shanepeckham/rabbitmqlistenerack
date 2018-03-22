@@ -13,8 +13,8 @@
     "jshint": "^2.9.1"
   },
   "dependencies": {
-    "amqplib": "latest",
-    "request": "latest",
-    "applicationinsights": "latest"
+    "amqplib": "0.5.2",
+    "request": "2.85.0",
+    "applicationinsights": "1.0.2"
   }
 }
