@@ -9,7 +9,7 @@ ENV PROCESSENDPOINT=
 ENV TEAMNAME=
 
 # Bundle app source
-ADD / . 
+COPY . .
 
 # Install app dependencies
 RUN npm install
