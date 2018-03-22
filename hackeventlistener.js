@@ -54,8 +54,8 @@ function start() {
 
         if (err) {
             // We had a problem connection to the instance, retry again
-            console.error("Error connecting to Rabbit instance. Will retry: " + err);
-            return setTimeout(start, 1000);
+            console.error("Error connecting to Rabbit instance. Will retry in 10 seconds: " + err);
+            return setTimeout(start, 10000);
         }
 
         conn.on("error", function (err) {
@@ -66,7 +66,7 @@ function start() {
 
         conn.on("close", function () {
             console.error("[AMQP] reconnecting");
-            return setTimeout(start, 1000);
+            return setTimeout(start, 10000);
         });
 
         console.log("[AMQP] connected");
