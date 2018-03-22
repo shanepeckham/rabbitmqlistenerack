@@ -4,15 +4,20 @@ FROM node:boron
 RUN mkdir -p /usr/src/hackeventlistener
 WORKDIR /usr/src/hackeventlistener
 
-ENV RABBITMQHOST=
+ENV AMQPURL=
 ENV PROCESSENDPOINT=
 ENV TEAMNAME=
-ENV PARTITIONKEY=
-# Bundle app source
-ADD / . 
+
+# Install app dependencies
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+# where available (npm@5+)
+COPY package*.json ./
 
 # Install app dependencies
 RUN npm install
+
+# Bundle app source
+COPY . .
 
 
 CMD [ "node", "hackeventlistener.js" ]
