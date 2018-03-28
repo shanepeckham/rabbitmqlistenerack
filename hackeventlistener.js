@@ -120,24 +120,29 @@ function startWorker() {
                 };
 
                 // Start the request
-                try {
-                    request(options, function () {});
-                } catch (e) {
-                    console.log('error!: ' + e.message);
-                }
-                ch.ack(msg);
+                console.log('attempting to POST order to fulfill api: ' + processendpoint);
+                request(options, function (error, response, body) {
+                    console.log('statusCode:', response && response.statusCode);
+                    console.log('error:', error);
+                    console.log('body:', body);
+
+                    // Acknowledge the message if we don't have errors
+                    if (!error) {
+                        console.log("acknowledging message");
+                        ch.ack(msg);
+                    }
+                });
             } // we have a process endpoint
+            else {
+                console.log('process endpoint not configured at PROCESSENDPOINT');
+            }
 
             try {
-
-                if (insightsKey != "") {
-                    let appclient = appInsights.defaultClient;
-                    appclient.trackEvent("RabbitMQListener: " + teamname);
-                }
+                let appclient = appInsights.defaultClient;
+                appclient.trackEvent("RabbitMQListener: " + teamname);
             } catch (e) {
                 console.error("AppInsights " + e.message);
             }
-
         }, {
             noAck: false
         });
