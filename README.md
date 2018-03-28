@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/shanepeckham/rabbitmqlistenerack/tree/master.svg?style=svg)](https://circleci.com/gh/shanepeckham/rabbitmqlistenerack/tree/master)
+
 # RabbitMQ Listener - TACK
 A containerised nodejs event listener that listens to RabbitMQ and passes requests on to an internal endpoint
 
