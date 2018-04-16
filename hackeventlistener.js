@@ -139,7 +139,14 @@ function startWorker() {
 
             try {
                 let appclient = appInsights.defaultClient;
-                appclient.trackEvent("RabbitMQListener: " + teamname);
+                appclient.trackEvent({
+                    name: "RabbitMQListener: - Team Name " + teamname,
+                    properties: {
+                      team: teamname,
+                      challenge: "4-eventlistener",
+                      type: "rabbitmq"
+                    }
+                  });
             } catch (e) {
                 console.error("AppInsights " + e.message);
             }
